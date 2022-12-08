@@ -1,0 +1,41 @@
+#!/usr/bin/env raku
+
+use Test;
+use NativeCall;
+use Math::Libgsl::Constants;
+use lib 'lib';
+use Math::Libgsl::Raw::Series;
+
+constant \N = 20;
+my $array = CArray[num64].allocate(N);
+my num64 $sum_accel;
+my num64 $abserr;
+
+subtest 'acceleration' => {
+  my gsl_sum_levin_u_workspace $w = gsl_sum_levin_u_alloc(N);
+  isa-ok $w, Math::Libgsl::Raw::Series::gsl_sum_levin_u_workspace, 'allocate series workspace';
+
+  (^N).map: -> $n { my num64 $np1 = $n + 1e0; $array[$n] = 1e0 / ($np1 * $np1) }
+
+  ok gsl_sum_levin_u_accel($array, N, $w, $sum_accel, $abserr) == GSL_SUCCESS, 'compute Levin u-transform';
+  ok $sum_accel ≅ 1.6449340669228176, 'accelerated sum';
+  ok $abserr ≅ 8.883604962761638e-11, 'estimated error';
+
+  lives-ok { gsl_sum_levin_u_free($w) }, 'free series workspace';
+}
+
+subtest 'acceleration without error estimation' => {
+  my gsl_sum_levin_utrunc_workspace $w = gsl_sum_levin_utrunc_alloc(N);
+  isa-ok $w, Math::Libgsl::Raw::Series::gsl_sum_levin_utrunc_workspace, 'allocate series workspace';
+
+  (^N).map: -> $n { my num64 $np1 = $n + 1e0; $array[$n] = 1e0 / ($np1 * $np1) }
+
+  ok gsl_sum_levin_utrunc_accel($array, N, $w, $sum_accel, $abserr) == GSL_SUCCESS,
+                                  'compute Levin u-transform with truncation error';
+  ok $sum_accel ≅ 1.6449340669228176, 'accelerated sum';
+  ok $abserr ≅ 8.883604962761638e-11, 'estimated error';
+
+  lives-ok { gsl_sum_levin_utrunc_free($w) }, 'free series workspace';
+}
+
+done-testing;

@@ -1,0 +1,9 @@
+#!/usr/bin/env raku
+
+use Test;
+use lib 'lib';
+
+use-ok 'Math::Libgsl::Raw::Series';
+use-ok 'Math::Libgsl::Series';
+
+done-testing;

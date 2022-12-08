@@ -1,0 +1,43 @@
+#!/usr/bin/env perl6
+
+use Test;
+use lib 'lib';
+use Math::Libgsl::Series;
+
+sub build-array is pure {
+  constant \N = 20;
+  my @array := Array[Num].new;
+  (^N).map: -> $n { my $np1 = $n + 1e0; @array[$n] = 1e0 / ($np1 * $np1) }
+  @array;
+}
+
+subtest 'acceleration' => {
+  my Math::Libgsl::Series $s .= new: N;
+  isa-ok $s, Math::Libgsl::Series, 'allocate series object';
+  ok $s.truncation == False, 'no truncation';
+
+  my @array := build-array;
+  my ($sum, $err, $used);
+  lives-ok { ($sum, $err, $used) = $s.levin-accel: @array }, 'Levin acceleration';
+  ok $sum ≅ 1.6449340669228176, 'accelerated sum';
+  ok $err ≅ 8.883604962761638e-11, 'estimated error';
+  ok $used == 13, 'number of terms used';
+  dies-ok { ($sum, $err, $used) = $s.levin-accel: 0e0 xx 20 }, 'Levin acceleration fails if any value == 0';
+}
+
+subtest 'acceleration without error estimation' => {
+  my Math::Libgsl::Series $s1 .= new: N, True;
+  isa-ok $s1, Math::Libgsl::Series, 'allocate series object';
+  my Math::Libgsl::Series $s2 .= new: :size(N), :truncation;
+  isa-ok $s2, Math::Libgsl::Series, 'allocate series object using named arguments';
+  ok $s2.truncation == True, 'with truncation';
+
+  my @array := build-array;
+  my ($sum, $err, $used);
+  lives-ok { ($sum, $err, $used) = $s2.levin-accel: @array }, 'Levin acceleration';
+  ok $sum ≅ 1.6449340669228176, 'accelerated sum';
+  ok $err ≅ 8.883604962761638e-11, 'estimated error';
+  ok $used == 20, 'number of terms used';
+}
+
+done-testing;

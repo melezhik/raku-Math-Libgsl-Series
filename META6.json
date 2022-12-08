@@ -1,0 +1,29 @@
+{
+  "auth": "zef:FRITH",
+  "authors": [
+    "Fernando Santagata"
+  ],
+  "build-depends": [
+  ],
+  "depends": [
+    "Math::Libgsl::Constants"
+  ],
+  "description": "An interface to libgsl, the Gnu Scientific Library - Series Acceleration",
+  "license": "Artistic-2.0",
+  "name": "Math::Libgsl::Series",
+  "perl": "6.d",
+  "provides": {
+    "Math::Libgsl::Raw::Series": "lib/Math/Libgsl/Raw/Series.rakumod",
+    "Math::Libgsl::Series": "lib/Math/Libgsl/Series.rakumod"
+  },
+  "resources": [
+  ],
+  "source-url": "https://github.com/frithnanth/raku-Math-Libgsl-Series.git",
+  "tags": [
+    "math",
+    "nativecall"
+  ],
+  "test-depends": [
+  ],
+  "version": "0.0.1"
+}
